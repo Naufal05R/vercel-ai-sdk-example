@@ -1,9 +1,9 @@
 import { google } from "@ai-sdk/google";
-import { generateObject } from "ai";
+import { streamObject } from "ai";
 import { z } from "zod";
 
 export default async function Home() {
-  const result = await generateObject({
+  const result = streamObject({
     model: google("gemini-1.5-pro-latest"),
     prompt: "Who created Java?",
     schema: z.object({
@@ -12,7 +12,9 @@ export default async function Home() {
     }),
   });
 
-  console.log(result.object);
+  for await (const partialObject of result.partialObjectStream) {
+    console.log(partialObject);
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
