@@ -1,24 +1,27 @@
-import { google } from "@ai-sdk/google";
-import { streamObject } from "ai";
-import { z } from "zod";
+"use client";
 
-export default async function Home() {
-  const result = streamObject({
-    model: google("gemini-1.5-pro-latest"),
-    prompt: "Who created Java?",
-    schema: z.object({
-      headline: z.string().describe("headline of the response"),
-      details: z.string().describe("more details"),
-    }),
-  });
+import { useChat } from "@ai-sdk/react";
 
-  for await (const partialObject of result.partialObjectStream) {
-    console.log(partialObject);
-  }
-
+export default function Chat() {
+  const { messages, input, handleInputChange, handleSubmit, data } = useChat();
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <p>Hello World!</p>
-    </main>
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+      {messages.map((m) => (
+        <div key={m.id} className="whitespace-pre-wrap">
+          {m.role === "user" ? "User: " : "AI: "}
+          {m.content}
+        </div>
+      ))}
+
+      <form onSubmit={handleSubmit}>
+        <input
+          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
+          value={input}
+          placeholder="Say something..."
+          onChange={handleInputChange}
+        />
+      </form>
+    </div>
   );
 }
